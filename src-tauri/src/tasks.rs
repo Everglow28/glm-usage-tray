@@ -24,7 +24,14 @@ impl UsageTask {
     }
 
     pub async fn run(&self) {
-        let mut interval = tokio::time::interval(Duration::from_secs(10)); // 首次10秒后执行
+        // 首次加载配置获取初始间隔
+        let initial_interval = load_config()
+            .map(|c| c.refresh_interval)
+            .unwrap_or(60);
+
+        let mut interval = tokio::time::interval(Duration::from_secs(initial_interval));
+        // 消耗第一次立即触发，使周期从现在开始计算
+        interval.tick().await;
 
         loop {
             interval.tick().await;
@@ -60,10 +67,6 @@ impl UsageTask {
                     let _ = self.handle.emit("usage-error", e);
                 }
             }
-
-            // 根据配置调整间隔
-            let new_interval = Duration::from_secs(config.refresh_interval);
-            interval = tokio::time::interval(new_interval);
         }
     }
 
