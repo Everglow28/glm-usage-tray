@@ -13,18 +13,14 @@
   onMount(async () => {
     // 加载配置
     config = await invoke("get_config");
-    console.log("=== App.svelte 调试 ===");
-    console.log("Initial config:", config);
 
     // 先设置事件监听器（确保不丢失后续事件）
     const unlistenUsage = await listen("usage-update", (event: any) => {
-      console.log("usage-update event received:", event.payload);
       usage = event.payload;
       error = null;
     });
 
     const unlistenError = await listen("usage-error", (event: any) => {
-      console.log("usage-error event received:", event.payload);
       error = event.payload;
     });
 
@@ -35,8 +31,6 @@
     // 然后获取当前状态（在监听器设置之后）
     usage = await invoke("get_current_usage");
     error = await invoke("get_current_error");
-    console.log("Initial usage:", usage);
-    console.log("Initial error:", error);
 
     // 如果有配置且有效，默认显示用量页面
     if (config && config.token && config.organization && config.project) {

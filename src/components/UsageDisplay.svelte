@@ -8,6 +8,8 @@
 
   let lastUpdate: Date | null = null;
   let limits: any[] = [];
+  let isManualRefresh = false; // 标记是否是手动刷新
+  let refreshCounter = 0; // 用于强制刷新
 
   // 检查是否正在加载或无数据
   $: hasData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
@@ -15,34 +17,47 @@
 
   // 监听 usage 变化，提取 limits 数据
   $: if (usage?.success && usage?.data?.limits) {
-    console.log("=== UsageDisplay 调试 ===");
-    console.log("usage 值:", usage);
-    console.log("limits 数组:", usage.data.limits);
     limits = usage.data.limits;
-    lastUpdate = new Date();
-    console.log("hasData:", limits.length > 0);
+    // 只有在非手动刷新时才更新 lastUpdate
+    if (!isManualRefresh) {
+      lastUpdate = new Date();
+    }
   }
+
+  // 响应式：当 refreshCounter 或 lastUpdate 变化时，强制更新显示
+  $: displayTime = (() => {
+    // 刷新 refreshCounter 到此作用域，确保响应式生效
+    const _ = refreshCounter;
+    if (!lastUpdate) return "未更新";
+    return formatDate(lastUpdate);
+  })();
 
   // 组件挂载时，如果没有数据，自动触发一次刷新
   onMount(async () => {
     const hasInitialData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
     if (!hasInitialData && !error) {
-      console.log("UsageDisplay: 首次加载且无数据，触发自动刷新");
       await refresh();
     }
   });
 
   async function refresh() {
+    isManualRefresh = true; // 标记为手动刷新
     try {
       const result = await invoke("manual_refresh");
       if (result) {
         usage = result;
         error = null;
+        lastUpdate = new Date();
+        refreshCounter++; // 强制触发响应式更新
       }
     } catch (e: any) {
       error = String(e);
+    } finally {
+      // 使用 setTimeout 确保响应式语句执行后再重置标志
+      setTimeout(() => {
+        isManualRefresh = false;
+      }, 0);
     }
-    lastUpdate = new Date();
   }
 
   function formatNumber(num: number, limitType: string): string {
@@ -96,7 +111,8 @@
     const day = String(date.getDate()).padStart(2, "0");
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   }
 
   function formatDateTime(date: Date): string {
@@ -209,7 +225,7 @@
       <div class="update-info">
         <span class="update-icon">◷</span>
         <span class="update-label">最近更新时间: </span>
-        <span class="update-text">{formatLastUpdate()}</span>
+        <span class="update-text">{displayTime}</span>
       </div>
       <button class="refresh-btn" on:click={refresh}>
         <span class="refresh-icon">⟳</span> 刷新
