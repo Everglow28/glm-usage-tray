@@ -9,7 +9,8 @@
       "args": ["run", "devT"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen"
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "Tauri 开发 (调试模式)",
@@ -20,9 +21,7 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "env": {
-        "GLM_DEBUG": "1"
-      }
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
