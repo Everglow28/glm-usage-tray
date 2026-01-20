@@ -45,41 +45,49 @@
     lastUpdate = new Date();
   }
 
-  function formatNumber(num: number): string {
-    if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-    if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
+  function formatNumber(num: number, limitType: string): string {
+    if (limitType === "TOKENS_LIMIT") {
+      // Token 限额：转换为"万"并保留一位小数，但不带单位后缀
+      return (num / 10_000).toFixed(1);
+    }
+    // 其他类型：直接返回数字
     return num.toString();
   }
 
   function getLimitTitle(limit: any): string {
     switch (limit.type) {
       case "TIME_LIMIT":
-        return "时间限额";
+        return "MCP每月额度";
       case "TOKENS_LIMIT":
-        return "Token 限额";
+        return "每5小时使用限额";
+      default:
+        return limit.type;
+    }
+  }
+
+  function getLimitTypeLabel(limit: any): string {
+    switch (limit.type) {
+      case "TIME_LIMIT":
+        return "次";
+      case "TOKENS_LIMIT":
+        return "万";
       default:
         return limit.type;
     }
   }
 
   function getResetTimeText(limit: any): string {
-    if (limit.next_reset_time) {
-      const date = new Date(limit.next_reset_time);
-      return `重置: ${formatDate(date)}`;
-    }
     if (limit.type === "TIME_LIMIT") {
-      switch (limit.unit) {
-        case 1:
-          return "每小时重置";
-        case 5:
-          return "每5小时重置";
-        case 24:
-          return "每天重置";
-        default:
-          return `每${limit.unit}小时重置`;
-      }
+      return "每月1号00:00重置";
     }
-    return "重置: 未知";
+    if (limit.type === "TOKENS_LIMIT") {
+      if (limit.nextResetTime) {
+        const date = new Date(limit.nextResetTime);
+        return `重置时间: ${formatDateTime(date)}`;
+      }
+      return "重置时间: 未知";
+    }
+    return "重置时间: 未知";
   }
 
   function formatDate(date: Date): string {
@@ -89,6 +97,13 @@
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
     return `${year}-${month}-${day} ${hours}:${minutes}`;
+  }
+
+  function formatDateTime(date: Date): string {
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   }
 
   function formatLastUpdate(): string {
@@ -129,7 +144,7 @@
           <!-- 卡片标题 -->
           <div class="card-header">
             <h2 class="card-title">{getLimitTitle(limit)}</h2>
-            <span class="card-type">{limit.type}</span>
+            <span class="type-unit">{getLimitTypeLabel(limit)}</span>
           </div>
 
           <!-- 百分比显示 -->
@@ -152,16 +167,16 @@
           <div class="values-row">
             <div class="value-item">
               <span class="value-label">已用</span>
-              <span class="value-number">{formatNumber(limit.currentValue)}</span>
+              <span class="value-number">{formatNumber(limit.currentValue, limit.type)}</span>
             </div>
             <div class="value-divider">/</div>
             <div class="value-item">
               <span class="value-label">总额</span>
-              <span class="value-number">{formatNumber(limit.usage)}</span>
+              <span class="value-number">{formatNumber(limit.usage, limit.type)}</span>
             </div>
             <div class="value-item">
               <span class="value-label">剩余</span>
-              <span class="value-number">{formatNumber(limit.remaining)}</span>
+              <span class="value-number">{formatNumber(limit.remaining, limit.type)}</span>
             </div>
           </div>
 
@@ -179,7 +194,7 @@
                 {#each limit.usage_details as detail}
                   <div class="detail-row">
                     <span class="detail-name">{detail.model_code}</span>
-                    <span class="detail-value">{detail.usage}</span>
+                    <span class="detail-value">{formatNumber(detail.usage, "TOKENS_LIMIT")}</span>
                   </div>
                 {/each}
               </div>
@@ -193,6 +208,7 @@
     <div class="bottom-bar">
       <div class="update-info">
         <span class="update-icon">◷</span>
+        <span class="update-label">最近更新时间: </span>
         <span class="update-text">{formatLastUpdate()}</span>
       </div>
       <button class="refresh-btn" on:click={refresh}>
@@ -365,7 +381,7 @@
     margin: 0;
   }
 
-  .card-type {
+  .type-unit {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     font-weight: 600;
@@ -528,6 +544,11 @@
     font-size: 13px;
     font-weight: 500;
     color: #525252;
+  }
+
+  .update-label {
+    font-weight: 500;
+    color: #737373;
   }
 
   .update-icon {
