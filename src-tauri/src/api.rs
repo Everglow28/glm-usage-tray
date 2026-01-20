@@ -11,22 +11,31 @@ pub struct UsageData {
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiResponse {
-    #[serde(rename = "data")]
     data: ApiData,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ApiData {
-    #[serde(rename = "totalTokens")]
-    total_tokens: Option<u64>,
-    #[serde(rename = "usedTokens")]
-    used_tokens: Option<u64>,
-    #[serde(rename = "remainingTokens")]
-    remaining_tokens: Option<u64>,
-    // 根据实际 API 响应调整字段
+    limits: Vec<LimitItem>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct LimitItem {
+    #[serde(rename = "type")]
+    limit_type: String,
+    usage: u64,
+    #[serde(rename = "currentValue")]
+    current_value: u64,
+    remaining: u64,
+    percentage: f64,
 }
 
 pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
+    println!("[DEBUG] 开始获取用量数据...");
+    println!("[DEBUG] Token: {}...", &config.token[..config.token.len().min(20)]);
+    println!("[DEBUG] Organization: {}", config.organization);
+    println!("[DEBUG] Project: {}", config.project);
+
     let client = reqwest::Client::builder()
         .build()
         .map_err(|e| format!("创建客户端失败: {}", e))?;
@@ -43,6 +52,9 @@ pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
     let status = response.status();
     let body = response.text().await.map_err(|e| format!("读取响应失败: {}", e))?;
 
+    println!("[DEBUG] API 响应状态: {}", status);
+    println!("[DEBUG] API 原始响应: {}", body);
+
     if !status.is_success() {
         if status.as_u16() == 401 {
             return Err("Token 已过期或无效，请更新配置".to_string());
@@ -54,22 +66,26 @@ pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
     let api_response: ApiResponse =
         serde_json::from_str(&body).map_err(|e| format!("解析响应失败: {} | 响应内容: {}", e, body))?;
 
-    let total = api_response.data.total_tokens.unwrap_or(0);
-    let used = api_response.data.used_tokens.unwrap_or(0);
-    let remaining = api_response.data.remaining_tokens.unwrap_or(0);
+    println!("[DEBUG] 解析后数据: {:?}", api_response.data);
 
-    // 计算使用百分比
-    let usage_percentage = if total > 0 {
-        (used as f64 / total as f64) * 100.0
-    } else {
-        0.0
-    };
+    // 从 limits 数组中找到 TOKENS_LIMIT 类型的条目
+    let token_limit = api_response.data.limits
+        .iter()
+        .find(|item| item.limit_type == "TOKENS_LIMIT")
+        .ok_or_else(|| format!("API 响应中未找到 TOKENS_LIMIT 类型: {:?}", api_response.data.limits))?;
+
+    let total = token_limit.usage;
+    let used = token_limit.current_value;
+    let remaining = token_limit.remaining;
+    let percentage = token_limit.percentage;
+
+    println!("[DEBUG] total: {}, used: {}, remaining: {}, percentage: {}", total, used, remaining, percentage);
 
     Ok(UsageData {
         total_tokens: total,
         used_tokens: used,
         remaining_tokens: remaining,
-        usage_percentage,
+        usage_percentage: percentage,
     })
 }
 
