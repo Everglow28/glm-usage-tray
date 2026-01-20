@@ -96,8 +96,8 @@ glm-usage-tray/
    # 合并功能分支
    git merge feature/功能名称
 
-   # 删除已完成的功能分支（可选）
-   git branch -d feature/功能名称
+   # 注意：保留功能分支，不删除
+   # 分支保留便于查看历史和回滚
    ```
 
 4. **分支命名规范**
