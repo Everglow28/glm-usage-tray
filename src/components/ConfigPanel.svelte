@@ -5,12 +5,20 @@
   export let onSave: (config: any) => void;
   export let onClose: () => void;
 
-  let token = config?.token || "";
-  let organization = config?.organization || "";
-  let project = config?.project || "";
-  let refreshInterval = config?.refresh_interval || 60;
+  let token = "";
+  let organization = "";
+  let project = "";
+  let refreshInterval = 60;
   let testing = false;
   let testResult: { type: "success" | "error"; message: string } | null = null;
+
+  // 当 config prop 更新时，同步到本地变量
+  $: if (config) {
+    token = config.token || "";
+    organization = config.organization || "";
+    project = config.project || "";
+    refreshInterval = config.refresh_interval || 60;
+  }
 
   async function testConnection() {
     if (!token || !organization || !project) {
@@ -33,8 +41,11 @@
 
       // 从新的 API 结构中提取数据
       const data = result as any;
+      console.log("Test connection result:", data);
+
       if (data?.data?.limits && data.data.limits.length > 0) {
         const tokenLimit = data.data.limits.find((l: any) => l.limit_type === "TOKENS_LIMIT");
+        console.log("Found token limit:", tokenLimit);
         if (tokenLimit) {
           testResult = {
             type: "success",
@@ -47,6 +58,7 @@
         testResult = { type: "error", message: "API 返回数据格式异常" };
       }
     } catch (e: any) {
+      console.error("Test connection error:", e);
       testResult = { type: "error", message: String(e) };
     } finally {
       testing = false;

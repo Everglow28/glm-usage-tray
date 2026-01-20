@@ -8,14 +8,16 @@
   let lastUpdate: Date | null = null;
   let limits: any[] = [];
 
-  // 监听 usage 变化
-  $: if (usage?.data?.limits && usage.data.limits.length > 0) {
+  // 监听 usage 变化，提取 limits 数据
+  $: if (usage?.success && usage?.data?.limits) {
     limits = usage.data.limits;
     lastUpdate = new Date();
+    console.log("Usage updated, limits:", limits);
   }
 
-  // 检查是否正在加载
-  $: isLoading = !usage || (usage && !usage.data);
+  // 检查是否正在加载或无数据
+  $: hasData = limits.length > 0;
+  $: isLoading = !usage;
 
   async function refresh() {
     try {
@@ -107,7 +109,7 @@
     </div>
   {/if}
 
-  {#if !isLoading && limits.length > 0}
+  {#if hasData}
     <div class="cards-grid">
       {#each limits as limit (limit.limit_type)}
         <div class="limit-card">
@@ -187,7 +189,7 @@
   {:else}
     <div class="loading-state">
       <div class="loading-spinner"></div>
-      <p class="loading-text">正在加载用量数据...</p>
+      <p class="loading-text">{isLoading ? "正在加载用量数据..." : "暂无数据，请先配置 API 信息"}</p>
       <button class="loading-btn" on:click={refresh}>手动刷新</button>
     </div>
   {/if}
