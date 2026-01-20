@@ -13,13 +13,62 @@ Windows 系统托盘应用，实时监控 GLM Coding Plan 订阅使用量。
 
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
-# 开发模式
-npm run tauri dev
+# 开发模式（正常模式，无 debug 日志）
+pnpm run devT
+
+# 开发模式（调试模式，显示详细日志）
+pnpm run devT:debug
 
 # 构建
-npm run tauri build
+pnpm run build
+```
+
+## 调试模式
+
+调试模式下会输出详细的 API 请求/响应日志，便于排查问题。
+
+### 方法 1: 使用预定义脚本
+
+```bash
+pnpm run devT:debug
+```
+
+### 方法 2: 直接设置环境变量（跨平台）
+
+```bash
+# Windows CMD
+cross-env GLM_DEBUG=1 pnpm run devT
+
+# Windows PowerShell
+$env:GLM_DEBUG="1"; pnpm run devT
+
+# Linux/macOS
+GLM_DEBUG=1 pnpm run devT
+```
+
+### 支持的环境变量
+
+以下任一环境变量都可启用调试模式：
+
+| 环境变量 | 值 |
+|----------|-----|
+| `GLM_DEBUG` | `1`, `true`, `debug` |
+| `DEBUG` | `1`, `true`, `debug` |
+| `RUST_LOG` | `debug`, `glm_usage_tray` |
+
+### 示例
+
+```bash
+# 使用 DEBUG 变量
+cross-env DEBUG=1 pnpm run devT
+
+# 使用 RUST_LOG 变量
+cross-env RUST_LOG=debug pnpm run devT
+
+# 组合多个值
+cross-env GLM_DEBUG=true pnpm run devT
 ```
 
 ## 配置说明
@@ -44,5 +93,5 @@ glm-usage-tray/
 ## 技术栈
 
 - Rust + Tauri 2.x
-- Svelte 5 + TypeScript
+- Svelte 4 + TypeScript
 - 系统 API: 智谱 AI 监控接口

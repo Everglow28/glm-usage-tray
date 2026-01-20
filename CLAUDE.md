@@ -9,7 +9,7 @@ Windows 系统托盘应用，使用 Rust + Tauri 技术栈，实时监控 GLM Co
 | 组件 | 技术 |
 |------|------|
 | 后端 | Rust + Tauri 2.x |
-| 前端 | Svelte 5 + TypeScript |
+| 前端 | Svelte 4 + TypeScript |
 | API | 智谱 AI 监控接口 |
 | 存储 | 本地 JSON 配置文件 |
 
@@ -22,8 +22,9 @@ glm-usage-tray/
 │   ├── tauri.conf.json         # Tauri 配置
 │   ├── src/
 │   │   ├── main.rs             # 主入口
-│   │   ├── lib.rs              # 库入口
+│   │   ├── lib.rs              # 库入口 + 日志宏
 │   │   ├── api.rs              # GLM API 调用
+│   │   ├── debug.rs            # 调试开关
 │   │   ├── tray.rs             # 系统托盘实现
 │   │   ├── commands.rs         # Tauri 命令
 │   │   ├── config.rs           # 配置管理
