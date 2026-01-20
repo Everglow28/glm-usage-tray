@@ -27,9 +27,9 @@ pub struct LimitItem {
     pub current_value: u64,
     pub remaining: u64,
     pub percentage: f64,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "usageDetails", default)]
     pub usage_details: Option<Vec<UsageDetail>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "nextResetTime", default)]
     pub next_reset_time: Option<u64>,
 }
 
