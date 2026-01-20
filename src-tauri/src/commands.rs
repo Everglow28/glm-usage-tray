@@ -1,6 +1,6 @@
 use crate::api::{fetch_usage, UsageData};
 use crate::config::{load_config, save_config, ApiConfig};
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 
 pub type UsageState = std::sync::Arc<tokio::sync::Mutex<Option<UsageData>>>;
 pub type ErrorState = std::sync::Arc<tokio::sync::Mutex<Option<String>>>;
@@ -37,6 +37,33 @@ pub async fn get_current_usage(
 pub async fn get_current_error(error_state: State<'_, ErrorState>) -> Result<Option<String>, String> {
     let state = error_state.lock().await;
     Ok((*state).clone())
+}
+
+#[tauri::command]
+pub async fn manual_refresh(
+    usage_state: State<'_, UsageState>,
+    error_state: State<'_, ErrorState>,
+    app: tauri::AppHandle,
+) -> Result<Option<UsageData>, String> {
+    let config = load_config().ok_or("未配置 API 信息".to_string())?;
+
+    if !crate::config::is_config_valid(&config) {
+        return Err("API 配置不完整".to_string());
+    }
+
+    match fetch_usage(&config).await {
+        Ok(usage) => {
+            *usage_state.lock().await = Some(usage.clone());
+            *error_state.lock().await = None;
+            let _ = app.emit("usage-update", &usage);
+            Ok(Some(usage))
+        }
+        Err(e) => {
+            *error_state.lock().await = Some(e.clone());
+            let _ = app.emit("usage-error", &e);
+            Err(e)
+        }
+    }
 }
 
 #[tauri::command]

@@ -9,15 +9,24 @@
   let limits: any[] = [];
 
   // 监听 usage 变化
-  $: if (usage?.data?.limits) {
+  $: if (usage?.data?.limits && usage.data.limits.length > 0) {
     limits = usage.data.limits;
     lastUpdate = new Date();
   }
 
+  // 检查是否正在加载
+  $: isLoading = !usage || (usage && !usage.data);
+
   async function refresh() {
-    const result = await invoke("get_current_usage");
-    usage = result;
-    error = await invoke("get_current_error");
+    try {
+      const result = await invoke("manual_refresh");
+      if (result) {
+        usage = result;
+        error = null;
+      }
+    } catch (e: any) {
+      error = String(e);
+    }
     lastUpdate = new Date();
   }
 
@@ -98,7 +107,7 @@
     </div>
   {/if}
 
-  {#if limits.length > 0}
+  {#if !isLoading && limits.length > 0}
     <div class="cards-grid">
       {#each limits as limit (limit.limit_type)}
         <div class="limit-card">

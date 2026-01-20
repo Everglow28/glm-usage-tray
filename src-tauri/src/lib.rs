@@ -55,6 +55,7 @@ pub fn run() {
             commands::test_connection,
             commands::get_current_usage,
             commands::get_current_error,
+            commands::manual_refresh,
             commands::hide_window,
         ])
         .setup(|app| {
