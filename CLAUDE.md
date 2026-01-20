@@ -72,16 +72,16 @@ glm-usage-tray/
 
 ### Git 分支管理
 
-采用功能分支工作流，确保主分支稳定性：
+采用单一开发分支工作流：
 
 1. **主分支保护**
    - `master` 分支禁止直接提交代码
-   - 所有代码修改必须通过功能分支进行
+   - 所有代码修改必须通过 `dev` 分支进行
 
-2. **功能分支开发**
+2. **开发流程**
    ```bash
-   # 创建功能分支
-   git checkout -b feature/功能名称
+   # 切换到 dev 分支
+   git checkout dev
 
    # 开发并提交
    git add .
@@ -93,17 +93,14 @@ glm-usage-tray/
    # 切换到主分支
    git checkout master
 
-   # 合并功能分支
-   git merge feature/功能名称
-
-   # 注意：保留功能分支，不删除
-   # 分支保留便于查看历史和回滚
+   # 合并 dev 分支
+   git merge dev --ff-only
    ```
 
-4. **分支命名规范**
-   - 功能开发：`feature/功能描述`
-   - 问题修复：`fix/问题描述`
-   - 文档更新：`docs/文档描述`
+4. **分支规则**
+   - 仅保留两个分支：`master` 和 `dev`
+   - 所有开发（功能、修复、文档）都在 `dev` 上进行
+   - 定期将 `dev` 合并到 `master`
 
 ### 代码开发
 
