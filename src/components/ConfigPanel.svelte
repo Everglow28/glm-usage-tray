@@ -41,15 +41,23 @@
 
       // 从新的 API 结构中提取数据
       const data = result as any;
-      console.log("Test connection result:", data);
+      console.log("=== 测试连接调试 ===");
+      console.log("完整响应:", JSON.stringify(data, null, 2));
+      console.log("limits 数组:", data?.data?.limits);
+      console.log("limits 长度:", data?.data?.limits?.length);
+      if (data?.data?.limits && data.data.limits.length > 0) {
+        console.log("第一个 limit:", JSON.stringify(data.data.limits[0], null, 2));
+        console.log("第一个 limit.limit_type:", data.data.limits[0].limit_type);
+        console.log("字段枚举:", Object.keys(data.data.limits[0]));
+      }
 
       if (data?.data?.limits && data.data.limits.length > 0) {
-        const tokenLimit = data.data.limits.find((l: any) => l.limit_type === "TOKENS_LIMIT");
-        console.log("Found token limit:", tokenLimit);
+        const tokenLimit = data.data.limits.find((l: any) => l.type === "TOKENS_LIMIT");
+        console.log("查找结果 tokenLimit:", tokenLimit);
         if (tokenLimit) {
           testResult = {
             type: "success",
-            message: `连接成功！Token: ${formatNumber(tokenLimit.current_value)} / ${formatNumber(tokenLimit.usage)} (${tokenLimit.percentage.toFixed(0)}%)`,
+            message: `连接成功！Token: ${formatNumber(tokenLimit.currentValue)} / ${formatNumber(tokenLimit.usage)} (${tokenLimit.percentage.toFixed(0)}%)`,
           };
         } else {
           testResult = { type: "success", message: "连接成功！但未找到 Token 限额数据" };
@@ -88,7 +96,8 @@
     }
   }
 
-  function formatNumber(n: number): string {
+  function formatNumber(n: number | undefined): string {
+    if (n === undefined || n === null) return "N/A";
     if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
     if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
     return n.toString();

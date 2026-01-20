@@ -10,14 +10,17 @@
 
   // 监听 usage 变化，提取 limits 数据
   $: if (usage?.success && usage?.data?.limits) {
+    console.log("=== UsageDisplay 调试 ===");
+    console.log("usage 值:", usage);
+    console.log("limits 数组:", usage.data.limits);
     limits = usage.data.limits;
     lastUpdate = new Date();
-    console.log("Usage updated, limits:", limits);
+    console.log("hasData:", limits.length > 0);
   }
 
   // 检查是否正在加载或无数据
-  $: hasData = limits.length > 0;
-  $: isLoading = !usage;
+  $: hasData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
+  $: isLoading = !hasData && !error;
 
   async function refresh() {
     try {
@@ -39,13 +42,13 @@
   }
 
   function getLimitTitle(limit: any): string {
-    switch (limit.limit_type) {
+    switch (limit.type) {
       case "TIME_LIMIT":
         return "时间限额";
       case "TOKENS_LIMIT":
         return "Token 限额";
       default:
-        return limit.limit_type;
+        return limit.type;
     }
   }
 
@@ -54,7 +57,7 @@
       const date = new Date(limit.next_reset_time);
       return `重置: ${formatDate(date)}`;
     }
-    if (limit.limit_type === "TIME_LIMIT") {
+    if (limit.type === "TIME_LIMIT") {
       switch (limit.unit) {
         case 1:
           return "每小时重置";
@@ -111,12 +114,12 @@
 
   {#if hasData}
     <div class="cards-grid">
-      {#each limits as limit (limit.limit_type)}
+      {#each limits as limit (limit.type)}
         <div class="limit-card">
           <!-- 卡片标题 -->
           <div class="card-header">
             <h2 class="card-title">{getLimitTitle(limit)}</h2>
-            <span class="card-type">{limit.limit_type}</span>
+            <span class="card-type">{limit.type}</span>
           </div>
 
           <!-- 百分比显示 -->
@@ -139,7 +142,7 @@
           <div class="values-row">
             <div class="value-item">
               <span class="value-label">已用</span>
-              <span class="value-number">{formatNumber(limit.current_value)}</span>
+              <span class="value-number">{formatNumber(limit.currentValue)}</span>
             </div>
             <div class="value-divider">/</div>
             <div class="value-item">
