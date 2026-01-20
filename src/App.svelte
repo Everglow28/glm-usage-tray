@@ -63,12 +63,12 @@
   :global(body) {
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa;
+    background: #f5f5f5;
   }
 
   .container {
     width: 100%;
-    height: 100%;
-    padding: 20px;
+    height: 100vh;
+    overflow-y: auto;
   }
 </style>

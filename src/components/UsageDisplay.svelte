@@ -40,9 +40,8 @@
 
   function getResetTimeText(limit: any): string {
     if (limit.next_reset_time) {
-      // 将时间戳转换为可读格式
       const date = new Date(limit.next_reset_time);
-      return `重置时间: ${formatDate(date)}`;
+      return `重置: ${formatDate(date)}`;
     }
     if (limit.limit_type === "TIME_LIMIT") {
       switch (limit.unit) {
@@ -56,7 +55,7 @@
           return `每${limit.unit}小时重置`;
       }
     }
-    return "重置时间: 未知";
+    return "重置: 未知";
   }
 
   function formatDate(date: Date): string {
@@ -74,278 +73,517 @@
   }
 
   function getProgressColor(percentage: number): string {
-    if (percentage >= 90) return "#ff4d4f";
-    if (percentage >= 70) return "#faad14";
-    return "#1890ff";
+    if (percentage >= 90) return "#dc2626"; // 红色 - 危险
+    if (percentage >= 70) return "#f59e0b"; // 橙色 - 警告
+    return "#2563eb"; // 蓝色 - 正常
   }
 </script>
 
 <div class="usage-display">
-  <div class="header">
-    <button class="config-btn" on:click={onConfig}>配置</button>
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="title-section">
+      <h1 class="app-title">GLM 用量监控</h1>
+      <div class="status-dot"></div>
+    </div>
+    <button class="config-btn" on:click={onConfig}>
+      <span class="icon">⚙</span> 配置
+    </button>
   </div>
 
   {#if error}
     <div class="error-banner">
-      <span class="icon">⚠</span>
-      <span>{error}</span>
+      <span class="error-icon">⚠</span>
+      <span class="error-text">{error}</span>
     </div>
   {/if}
 
   {#if limits.length > 0}
-    <div class="card-container">
+    <div class="cards-grid">
       {#each limits as limit (limit.limit_type)}
-        <div class="card">
+        <div class="limit-card">
+          <!-- 卡片标题 -->
           <div class="card-header">
-            <h3 class="title">{getLimitTitle(limit)}</h3>
-            <span class="info-icon">ℹ</span>
+            <h2 class="card-title">{getLimitTitle(limit)}</h2>
+            <span class="card-type">{limit.limit_type}</span>
           </div>
 
-          <div class="progress-section">
-            <span class="percentage">{limit.percentage.toFixed(0)}%</span>
-            <span class="text">已使用</span>
+          <!-- 百分比显示 -->
+          <div class="percentage-display">
+            <span class="percentage-value">{limit.percentage.toFixed(0)}%</span>
+            <span class="percentage-label">已使用</span>
           </div>
 
-          <div class="progress-bar">
-            <div
-              class="progress-fill"
-              style="width: {limit.percentage}%; background-color: {getProgressColor(limit.percentage)}"
-            ></div>
+          <!-- 进度条 -->
+          <div class="progress-container">
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                style="width: {limit.percentage}%; background-color: {getProgressColor(limit.percentage)}"
+              ></div>
+            </div>
           </div>
 
-          <p class="reset-time">{getResetTimeText(limit)}</p>
+          <!-- 数值详情 -->
+          <div class="values-row">
+            <div class="value-item">
+              <span class="value-label">已用</span>
+              <span class="value-number">{formatNumber(limit.current_value)}</span>
+            </div>
+            <div class="value-divider">/</div>
+            <div class="value-item">
+              <span class="value-label">总额</span>
+              <span class="value-number">{formatNumber(limit.usage)}</span>
+            </div>
+            <div class="value-item">
+              <span class="value-label">剩余</span>
+              <span class="value-number">{formatNumber(limit.remaining)}</span>
+            </div>
+          </div>
 
+          <!-- 重置时间 -->
+          <div class="reset-info">
+            <span class="reset-icon">↻</span>
+            <span class="reset-text">{getResetTimeText(limit)}</span>
+          </div>
+
+          <!-- 使用详情 -->
           {#if limit.usage_details && limit.usage_details.length > 0}
-            <div class="usage-details">
-              <h4>使用详情</h4>
-              {#each limit.usage_details as detail}
-                <div class="detail-item">
-                  <span class="model-name">{detail.model_code}</span>
-                  <span class="model-usage">{detail.usage} 次</span>
-                </div>
-              {/each}
+            <div class="details-section">
+              <h3 class="details-title">模型使用详情</h3>
+              <div class="details-list">
+                {#each limit.usage_details as detail}
+                  <div class="detail-row">
+                    <span class="detail-name">{detail.model_code}</span>
+                    <span class="detail-value">{detail.usage}</span>
+                  </div>
+                {/each}
+              </div>
             </div>
           {/if}
-
-          <div class="extra-info">
-            {formatNumber(limit.current_value)} / {formatNumber(limit.usage)}
-          </div>
         </div>
       {/each}
     </div>
 
-    <div class="footer">
-      <span>最近更新时间: {formatLastUpdate()}</span>
-      <button class="refresh-btn" on:click={refresh}>刷新</button>
+    <!-- 底部栏 -->
+    <div class="bottom-bar">
+      <div class="update-info">
+        <span class="update-icon">◷</span>
+        <span class="update-text">{formatLastUpdate()}</span>
+      </div>
+      <button class="refresh-btn" on:click={refresh}>
+        <span class="refresh-icon">⟳</span> 刷新
+      </button>
     </div>
   {:else}
-    <div class="loading">
-      <p>正在加载用量数据...</p>
-      <button on:click={refresh}>手动刷新</button>
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">正在加载用量数据...</p>
+      <button class="loading-btn" on:click={refresh}>手动刷新</button>
     </div>
   {/if}
 </div>
 
 <style>
+  /* 导入字体 - 使用几何无衬线 + 等宽字体 */
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
   .usage-display {
-    min-width: 500px;
-    max-width: 600px;
+    min-width: 640px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    padding: 24px;
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+    min-height: 100vh;
   }
 
-  .header {
+  /* 网格背景效果 */
+  .usage-display::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* 顶部栏 */
+  .top-bar {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 16px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e5e5;
+  }
+
+  .title-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .app-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0a0a0a;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
   }
 
   .config-btn {
-    padding: 6px 16px;
-    background: #fff;
-    border: 1px solid #d9d9d9;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: #ffffff;
+    border: 2px solid #d4d4d4;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: all 0.2s;
+    font-weight: 600;
+    color: #0a0a0a;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.15s ease;
   }
 
   .config-btn:hover {
-    border-color: #1890ff;
-    color: #1890ff;
+    background: #f5f5f5;
+    border-color: #0a0a0a;
   }
 
+  .config-btn:active {
+    transform: translateY(1px);
+  }
+
+  .config-btn .icon {
+    font-size: 16px;
+  }
+
+  /* 错误横幅 */
   .error-banner {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: #fff2f0;
-    border: 1px solid #ffccc7;
-    border-radius: 4px;
-    margin-bottom: 16px;
-    font-size: 14px;
-    color: #ff4d4f;
-  }
-
-  .error-banner .icon {
-    font-size: 16px;
-  }
-
-  .card-container {
-    display: flex;
-    gap: 16px;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fef2f2;
+    border: 2px solid #fecaca;
+    border-radius: 12px;
     margin-bottom: 20px;
   }
 
-  .card {
-    flex: 1;
+  .error-icon {
+    font-size: 20px;
+  }
+
+  .error-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #991b1b;
+  }
+
+  /* 卡片网格 */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  /* 卡片 */
+  .limit-card {
     background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    padding: 20px;
+    border: 2px solid #e5e5e5;
+    border-radius: 16px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
+    gap: 16px;
+    transition: all 0.2s ease;
   }
 
+  .limit-card:hover {
+    border-color: #d4d4d4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  /* 卡片头部 */
   .card-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
   }
 
-  .title {
-    font-size: 16px;
-    font-weight: 500;
-    color: #262626;
+  .card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0a0a0a;
     margin: 0;
   }
 
-  .info-icon {
-    margin-left: 8px;
-    font-size: 14px;
-    color: #1890ff;
-    cursor: help;
+  .card-type {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #737373;
+    background: #f5f5f5;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
-  .progress-section {
+  /* 百分比显示 */
+  .percentage-display {
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 10px;
   }
 
-  .percentage {
-    font-size: 32px;
-    font-weight: bold;
-    color: #262626;
+  .percentage-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+    color: #0a0a0a;
+    line-height: 1;
   }
 
-  .text {
+  .percentage-label {
     font-size: 14px;
-    color: #8c8c8c;
+    font-weight: 500;
+    color: #737373;
   }
 
-  .progress-bar {
-    height: 8px;
-    border-radius: 4px;
-    background-color: #e8f4ff;
+  /* 进度条 */
+  .progress-container {
+    width: 100%;
+  }
+
+  .progress-track {
+    height: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
     overflow: hidden;
-    margin-bottom: 12px;
+    border: 1px solid #e5e5e5;
   }
 
   .progress-fill {
     height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 7px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
   }
 
-  .reset-time {
+  /* 数值行 */
+  .values-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid #e5e5e5;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .value-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .value-label {
     font-size: 12px;
-    color: #8c8c8c;
-    margin: 0 0 12px 0;
+    font-weight: 500;
+    color: #737373;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 
-  .usage-details {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid #f0f0f0;
+  .value-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0a0a0a;
   }
 
-  .usage-details h4 {
+  .value-divider {
+    font-size: 20px;
+    font-weight: 400;
+    color: #d4d4d4;
+  }
+
+  /* 重置信息 */
+  .reset-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 13px;
     font-weight: 500;
-    color: #595959;
-    margin: 0 0 8px 0;
+    color: #525252;
   }
 
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    padding: 4px 0;
-  }
-
-  .model-name {
-    color: #8c8c8c;
-  }
-
-  .model-usage {
-    color: #262626;
-    font-weight: 500;
-  }
-
-  .extra-info {
+  .reset-icon {
     font-size: 14px;
-    color: #8c8c8c;
-    text-align: right;
-    margin-top: auto;
-    padding-top: 8px;
+    color: #737373;
   }
 
-  .footer {
+  /* 使用详情 */
+  .details-section {
+    padding-top: 16px;
+    border-top: 1px dashed #e5e5e5;
+  }
+
+  .details-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a0a0a;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: #595959;
-    padding: 0 4px;
+    padding: 8px 12px;
+    background: #fafafa;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  .detail-name {
+    font-weight: 500;
+    color: #525252;
+  }
+
+  .detail-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: #0a0a0a;
+  }
+
+  /* 底部栏 */
+  .bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 2px solid #e5e5e5;
+  }
+
+  .update-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #525252;
+  }
+
+  .update-icon {
+    font-size: 14px;
+    color: #737373;
   }
 
   .refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: #0a0a0a;
     border: none;
-    background: none;
-    color: #1890ff;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 12px;
-    padding: 4px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.15s ease;
   }
 
   .refresh-btn:hover {
-    text-decoration: underline;
+    background: #262626;
+    transform: translateY(-1px);
   }
 
-  .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #8c8c8c;
+  .refresh-btn:active {
+    transform: translateY(0);
   }
 
-  .loading p {
-    margin-bottom: 16px;
+  .refresh-icon {
+    font-size: 16px;
   }
 
-  .loading button {
-    padding: 8px 20px;
-    background: #1890ff;
-    color: white;
+  /* 加载状态 */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 20px;
+  }
+
+  .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e5e5e5;
+    border-top-color: #0a0a0a;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: #525252;
+    margin: 0;
+  }
+
+  .loading-btn {
+    padding: 12px 24px;
+    background: #0a0a0a;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.15s ease;
   }
 
-  .loading button:hover {
-    background: #40a9ff;
+  .loading-btn:hover {
+    background: #262626;
   }
 </style>
