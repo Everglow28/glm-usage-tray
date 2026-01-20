@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import { onMount } from "svelte";
 
   export let usage: any;
   export let error: string | null;
@@ -7,6 +8,10 @@
 
   let lastUpdate: Date | null = null;
   let limits: any[] = [];
+
+  // 检查是否正在加载或无数据
+  $: hasData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
+  $: isLoading = !hasData && !error;
 
   // 监听 usage 变化，提取 limits 数据
   $: if (usage?.success && usage?.data?.limits) {
@@ -18,9 +23,14 @@
     console.log("hasData:", limits.length > 0);
   }
 
-  // 检查是否正在加载或无数据
-  $: hasData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
-  $: isLoading = !hasData && !error;
+  // 组件挂载时，如果没有数据，自动触发一次刷新
+  onMount(async () => {
+    const hasInitialData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
+    if (!hasInitialData && !error) {
+      console.log("UsageDisplay: 首次加载且无数据，触发自动刷新");
+      await refresh();
+    }
+  });
 
   async function refresh() {
     try {
