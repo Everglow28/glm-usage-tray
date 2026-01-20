@@ -3,25 +3,35 @@
   "configurations": [
     {
       "name": "Tauri 开发",
-      "type": "node",
       "request": "launch",
-      "command": "pnpm",
-      "args": ["run", "devT"],
+      "runtimeArgs": [
+        "run-script",
+        "devT"
+      ],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**"]
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "name": "Tauri 开发 (调试模式)",
-      "type": "node",
       "request": "launch",
-      "command": "pnpm",
-      "args": ["run", "devT:debug"],
+      "runtimeArgs": [
+        "run-script",
+        "devT:debug"
+      ],
+      "runtimeExecutable": "pnpm",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**"]
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }
