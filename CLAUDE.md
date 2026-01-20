@@ -108,3 +108,53 @@ glm-usage-tray/
 2. 遵循单一职责原则
 3. 新功能添加前考虑测试策略
 4. 提交前确保代码编译通过
+
+## 重要注意事项
+
+### Rust 字段序列化规则
+
+Rust 结构体使用 `#[serde(rename = "...")]` 序列化后，JSON 字段名为驼峰式：
+
+| Rust 字段名 | serde 别名 | JSON 字段名 |
+|------------|-----------|------------|
+| `limit_type` | `rename = "type"` | `type` |
+| `current_value` | `rename = "currentValue"` | `currentValue` |
+| `usage_details` | `rename = "usageDetails"` | `usageDetails` |
+| `next_reset_time` | `rename = "nextResetTime"` | `nextResetTime` |
+
+**前端必须使用驼峰式字段名**（如 `currentValue`），而非 Rust 的 snake_case（如 `current_value`）。
+
+### Svelte 响应式更新
+
+当需要在函数内更新变量并触发界面重新渲染时：
+- 使用响应式语句 `$: ...` 确保依赖被正确追踪
+- 对于复杂的更新逻辑，可使用计数器变量强制刷新
+
+示例：
+```javascript
+let refreshCounter = 0;
+let lastUpdate: Date | null = null;
+
+$: displayTime = (() => {
+  const _ = refreshCounter; // 确保 refreshCounter 变化时触发重新计算
+  if (!lastUpdate) return "未更新";
+  return formatDate(lastUpdate);
+})();
+```
+
+## 已修复问题记录
+
+### 字段名不匹配导致显示错误
+- **问题**：前端使用 `current_value`，后端序列化为 `currentValue`
+- **修复**：统一使用驼峰式字段名
+- **文件**：`src/components/ConfigPanel.svelte`, `src/components/UsageDisplay.svelte`
+
+### 首次加载不自动刷新
+- **问题**：从配置界面进入使用情况界面时，数据不加载
+- **修复**：在 `UsageDisplay` 组件 `onMount` 时检查数据，若无则触发刷新
+- **文件**：`src/components/UsageDisplay.svelte`
+
+### 刷新按钮点击后时间不更新
+- **问题**：响应式语句与手动刷新冲突，`lastUpdate` 被覆盖
+- **修复**：使用 `isManualRefresh` 标志和 `refreshCounter` 计数器
+- **文件**：`src/components/UsageDisplay.svelte`
