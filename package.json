@@ -8,12 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "tauri": "tauri",
-    "devT": "tauri dev"
+    "devT": "tauri dev",
+    "devT:debug": "cross-env GLM_DEBUG=1 tauri dev"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@tauri-apps/cli": "^2.0.0",
     "@tsconfig/svelte": "^4.0.0",
+    "cross-env": "^10.1.0",
     "svelte": "^4.2.0",
     "svelte-check": "^4.0.0",
     "svelte-preprocess": "^6.0.3",

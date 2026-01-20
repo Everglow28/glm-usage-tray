@@ -1,4 +1,5 @@
 use crate::config::ApiConfig;
+use crate::{debug, warn, error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,10 +32,10 @@ struct LimitItem {
 }
 
 pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
-    println!("[DEBUG] 开始获取用量数据...");
-    println!("[DEBUG] Token: {}...", &config.token[..config.token.len().min(20)]);
-    println!("[DEBUG] Organization: {}", config.organization);
-    println!("[DEBUG] Project: {}", config.project);
+    debug!("开始获取用量数据...");
+    debug!("Token: {}...", &config.token[..config.token.len().min(20)]);
+    debug!("Organization: {}", config.organization);
+    debug!("Project: {}", config.project);
 
     let client = reqwest::Client::builder()
         .build()
@@ -52,13 +53,15 @@ pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
     let status = response.status();
     let body = response.text().await.map_err(|e| format!("读取响应失败: {}", e))?;
 
-    println!("[DEBUG] API 响应状态: {}", status);
-    println!("[DEBUG] API 原始响应: {}", body);
+    debug!("API 响应状态: {}", status);
+    debug!("API 原始响应: {}", body);
 
     if !status.is_success() {
         if status.as_u16() == 401 {
+            warn!("Token 已过期或无效，请更新配置");
             return Err("Token 已过期或无效，请更新配置".to_string());
         }
+        error!("API 错误 ({}): {}", status.as_u16(), body);
         return Err(format!("API 错误 ({}): {}", status.as_u16(), body));
     }
 
@@ -66,7 +69,7 @@ pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
     let api_response: ApiResponse =
         serde_json::from_str(&body).map_err(|e| format!("解析响应失败: {} | 响应内容: {}", e, body))?;
 
-    println!("[DEBUG] 解析后数据: {:?}", api_response.data);
+    debug!("解析后数据: {:?}", api_response.data);
 
     // 从 limits 数组中找到 TOKENS_LIMIT 类型的条目
     let token_limit = api_response.data.limits
@@ -79,7 +82,7 @@ pub async fn fetch_usage(config: &ApiConfig) -> Result<UsageData, String> {
     let remaining = token_limit.remaining;
     let percentage = token_limit.percentage;
 
-    println!("[DEBUG] total: {}, used: {}, remaining: {}, percentage: {}", total, used, remaining, percentage);
+    debug!("total: {}, used: {}, remaining: {}, percentage: {}", total, used, remaining, percentage);
 
     Ok(UsageData {
         total_tokens: total,

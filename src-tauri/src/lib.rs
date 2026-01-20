@@ -1,12 +1,44 @@
 mod api;
 mod commands;
 mod config;
+mod debug;
 mod tasks;
 mod tray;
 
 use commands::{ErrorState, UsageState};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+
+// 日志宏定义
+#[macro_export]
+macro_rules! debug {
+    ($($arg:tt)*) => {
+        if $crate::debug::is_debug_enabled() {
+            println!("[DEBUG] {}", format!($($arg)*));
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => {
+        println!("[INFO] {}", format!($($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! warn {
+    ($($arg:tt)*) => {
+        eprintln!("[WARN] {}", format!($($arg)*));
+    };
+}
+
+#[macro_export]
+macro_rules! error {
+    ($($arg:tt)*) => {
+        eprintln!("[ERROR] {}", format!($($arg)*));
+    };
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
