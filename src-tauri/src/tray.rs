@@ -12,7 +12,7 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
 
     let menu = Menu::with_items(app, &[&open_config, &refresh, &separator, &quit])?;
 
-    let icon_path = app.path().resolve("icons/icon.png", tauri::path::BaseDirectory::Resource)?;
+    let _icon_path = app.path().resolve("icons/icon.png", tauri::path::BaseDirectory::Resource)?;
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
@@ -23,7 +23,7 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
 
     // 处理托盘事件
     let app_handle = app.handle().clone();
-    tray.on_tray_icon_event(move |tray, event| {
+    tray.on_tray_icon_event(move |_tray, event| {
         if let TrayIconEvent::Click { button, .. } = event {
             if button == MouseButton::Left {
                 let _ = app_handle.emit("tray-click", ());
@@ -52,9 +52,4 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
     });
 
     Ok(tray)
-}
-
-pub fn update_tray_title(tray: &TrayIcon, title: &str) -> Result<(), Box<dyn std::error::Error>> {
-    tray.set_tooltip(Some(title));
-    Ok(())
 }
