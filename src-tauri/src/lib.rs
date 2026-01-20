@@ -7,7 +7,6 @@ mod tray;
 use commands::{ErrorState, UsageState};
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

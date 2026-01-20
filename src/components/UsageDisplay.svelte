@@ -5,7 +5,7 @@
   export let error: string | null;
   export let onConfig: () => void;
 
-  let lastUpdate = $state<Date | null>(null);
+  let lastUpdate: Date | null = null;
 
   async function refresh() {
     const result = await invoke("get_current_usage");

@@ -1,7 +1,7 @@
 use tauri::{
-    menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
-    tray::{TrayIcon, TrayIconBuilder, TrayIconEvent},
-    Manager, AppHandle, Emitter,
+    menu::{Menu, MenuItem, PredefinedMenuItem},
+    tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
+    Emitter, Manager,
 };
 
 pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error::Error>> {
@@ -16,7 +16,7 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
-        .menu_on_left_click(false)
+        .show_menu_on_left_click(false)
         .tooltip("GLM Usage Monitor")
         .icon_as_template(true)
         .build(app)?;
@@ -25,7 +25,7 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
     let app_handle = app.handle().clone();
     tray.on_tray_icon_event(move |tray, event| {
         if let TrayIconEvent::Click { button, .. } = event {
-            if button == tauri::tray::TriggerButtonType::Left {
+            if button == MouseButton::Left {
                 let _ = app_handle.emit("tray-click", ());
             }
         }
@@ -36,9 +36,10 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
     app.on_menu_event(move |app, event| {
         match event.id.as_ref() {
             "open" => {
-                let window = app.get_webview_window("config").unwrap();
-                let _ = window.show();
-                let _ = window.set_focus();
+                if let Some(window) = app.get_webview_window("config") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
             }
             "refresh" => {
                 let _ = app_handle.emit("manual-refresh", ());

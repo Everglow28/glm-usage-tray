@@ -5,10 +5,10 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
 
-  let config = $state<any>(null);
-  let usage = $state<any>(null);
-  let error = $state<string | null>(null);
-  let showConfig = $state(true);
+  let config: any = null;
+  let usage: any = null;
+  let error: string | null = null;
+  let showConfig = true;
 
   onMount(async () => {
     // 加载配置

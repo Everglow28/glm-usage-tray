@@ -5,12 +5,12 @@
   export let onSave: (config: any) => void;
   export let onClose: () => void;
 
-  let token = $state(config?.token || "");
-  let organization = $state(config?.organization || "");
-  let project = $state(config?.project || "");
-  let refreshInterval = $state(config?.refresh_interval || 60);
-  let testing = $state(false);
-  let testResult = $state<{ type: "success" | "error"; message: string } | null>(null);
+  let token = config?.token || "";
+  let organization = config?.organization || "";
+  let project = config?.project || "";
+  let refreshInterval = config?.refresh_interval || 60;
+  let testing = false;
+  let testResult: { type: "success" | "error"; message: string } | null = null;
 
   async function testConnection() {
     if (!token || !organization || !project) {
@@ -32,7 +32,7 @@
       });
       testResult = {
         type: "success",
-        message: `连接成功！已用: ${formatNumber(result.used_tokens)} / ${formatNumber(result.total_tokens)}`,
+        message: `连接成功！已用: ${formatNumber((result as any).used_tokens)} / ${formatNumber((result as any).total_tokens)}`,
       };
     } catch (e: any) {
       testResult = { type: "error", message: e as string };

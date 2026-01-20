@@ -1,9 +1,9 @@
 use crate::api::fetch_usage;
-use crate::config::{load_config, ApiConfig};
+use crate::config::load_config;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Mutex;
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 
 pub type UsageState = Arc<Mutex<Option<crate::api::UsageData>>>;
 pub type ErrorState = Arc<Mutex<Option<String>>>;

@@ -1,6 +1,6 @@
-use crate::api::{fetch_usage, format_tokens, UsageData};
+use crate::api::{fetch_usage, UsageData};
 use crate::config::{load_config, save_config, ApiConfig};
-use tauri::State;
+use tauri::{Manager, State};
 
 pub type UsageState = std::sync::Arc<tokio::sync::Mutex<Option<UsageData>>>;
 pub type ErrorState = std::sync::Arc<tokio::sync::Mutex<Option<String>>>;
@@ -26,25 +26,23 @@ pub fn test_connection(config: ApiConfig) -> Result<UsageData, String> {
 }
 
 #[tauri::command]
-pub fn get_current_usage(
+pub async fn get_current_usage(
     usage_state: State<'_, UsageState>,
 ) -> Result<Option<UsageData>, String> {
-    let state = usage_state.lock().map_err(|e| e.to_string())?;
+    let state = usage_state.lock().await;
     Ok((*state).clone())
 }
 
 #[tauri::command]
-pub fn get_current_error(error_state: State<'_, ErrorState>) -> Result<Option<String>, String> {
-    let state = error_state.lock().map_err(|e| e.to_string())?;
+pub async fn get_current_error(error_state: State<'_, ErrorState>) -> Result<Option<String>, String> {
+    let state = error_state.lock().await;
     Ok((*state).clone())
 }
 
 #[tauri::command]
-pub fn hide_window() -> Result<(), String> {
-    tauri::async_runtime::block_on(async {
-        if let Some(window) = tauri::webview_window::WebviewWindow::get_by_label("config") {
-            let _ = window.hide();
-        }
-        Ok(())
-    })
+pub async fn hide_window(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("config") {
+        let _ = window.hide();
+    }
+    Ok(())
 }
