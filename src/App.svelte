@@ -34,6 +34,11 @@
     usage = await invoke("get_current_usage");
     error = await invoke("get_current_error");
 
+    // 如果有配置且有效，默认显示用量页面
+    if (config && config.token && config.organization && config.project) {
+      showConfig = false;
+    }
+
     return () => {
       unlistenUsage();
       unlistenError();
@@ -55,6 +60,12 @@
 </div>
 
 <style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+  }
+
   .container {
     width: 100%;
     height: 100%;

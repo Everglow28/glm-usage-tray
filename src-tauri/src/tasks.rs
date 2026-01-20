@@ -68,16 +68,23 @@ impl UsageTask {
     }
 
     fn update_tray_title(&self, usage: &crate::api::UsageData) -> Result<(), String> {
-        let title = format!(
-            "GLM: {}/{} ({}%)",
-            crate::api::format_tokens(usage.used_tokens),
-            crate::api::format_tokens(usage.total_tokens),
-            usage.usage_percentage as u32
-        );
+        // 从 limits 数组中找到 TOKENS_LIMIT 类型
+        if let Some(token_limit) = usage.data.limits.iter()
+            .find(|item| item.limit_type == "TOKENS_LIMIT")
+        {
+            let title = format!(
+                "GLM: {}/{} ({}%)",
+                crate::api::format_tokens(token_limit.current_value),
+                crate::api::format_tokens(token_limit.usage),
+                token_limit.percentage as u32
+            );
+            let _ = self.handle.emit("tray-title-update", title);
+        } else {
+            // 如果没找到 TOKENS_LIMIT，显示通用信息
+            let title = format!("GLM: {} 限额", usage.data.limits.len());
+            let _ = self.handle.emit("tray-title-update", title);
+        }
 
-        // 这里需要从 AppHandle 获取 tray 实例
-        // 暂时通过事件发送到前端处理
-        let _ = self.handle.emit("tray-title-update", title);
         Ok(())
     }
 }
