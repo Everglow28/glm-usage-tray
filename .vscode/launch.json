@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Tauri 开发",
+      "type": "node",
+      "request": "launch",
+      "command": "pnpm",
+      "args": ["run", "devT"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Tauri 开发 (调试模式)",
+      "type": "node",
+      "request": "launch",
+      "command": "pnpm",
+      "args": ["run", "devT:debug"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "GLM_DEBUG": "1"
+      }
+    }
+  ]
+}
