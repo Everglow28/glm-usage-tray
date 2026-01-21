@@ -1,0 +1,13 @@
+{
+  "identifier": "default",
+  "description": "Default capabilities for the application",
+  "windows": ["*"],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-emit",
+    "core:event:default",
+    "core:path:default",
+    "core:window:default",
+    "core:webview:default"
+  ]
+}
