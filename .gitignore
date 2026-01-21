@@ -34,3 +34,6 @@ config.json
 
 # Temporary memory files
 .claude-temp.md
+
+# Tauri config schema
+tauriConfigV2.json
