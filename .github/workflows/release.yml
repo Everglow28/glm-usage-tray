@@ -87,26 +87,20 @@ jobs:
             src-tauri/target/**/release/bundle/dmg/*.dmg
             src-tauri/target/**/release/bundle/macos/*.app
           body: |
-            ## GLM Usage Tray ${{ github.ref_name }}
+            ## 🎉 GLM Usage Tray ${{ github.ref_name }}
 
-            ### 下载
+            ### 📦 下载
 
-            **Windows**
-            - `.exe` NSIS 安装包
-            - `.msi` Windows 安装程序
+            **Windows**: `.exe` / `.msi` 安装包
+            **macOS**: `.dmg` 磁盘映像 (Apple Silicon)
 
-            **macOS**
-            - `.dmg` 磁盘映像 (Apple Silicon)
-            - `.app` 应用程序
+            ### 🚀 快速安装
 
-            ### 安装方法
+            - **Windows**: 双击安装文件
+            - **macOS**: 打开 `.dmg`，拖应用到应用程序文件夹
 
-            **Windows**: 双击 `.exe` 或 `.msi` 文件运行安装
+            ### ⚙️ 配置
 
-            **macOS**: 打开 `.dmg` 文件，将应用拖到应用程序文件夹
-
-            ### 配置
-
-            首次运行需要配置 GLM API 凭证，请查看 [README](https://github.com/${{ github.repository }}/blob/main/README.md)
+            首次运行需要配置 GLM API 凭证，详见 [README](https://github.com/${{ github.repository }}/blob/main/README.md)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
