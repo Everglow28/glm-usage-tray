@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 
 export default defineConfig(async () => ({
-  plugins: [svelte()],
+  plugins: [react()],
   clearScreen: false,
   resolve: {
     alias: {
