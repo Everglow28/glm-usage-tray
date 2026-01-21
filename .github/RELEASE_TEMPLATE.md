@@ -3,14 +3,11 @@
 ### 📦 下载
 
 **Windows**: `.exe` / `.msi` 安装包
-**Linux**: `.deb` / `.AppImage` 通用包
 **macOS**: `.dmg` 磁盘映像（Intel x64）
 
 ### 🚀 快速安装
 
 - **Windows**: 双击安装文件
-- **Linux (Debian/Ubuntu)**: `sudo dpkg -i glm-usage-tray_*.deb`
-- **Linux (AppImage)**: `chmod +x *.AppImage && ./*.AppImage`
 - **macOS**: 打开 `.dmg`，拖应用到应用程序文件夹
 
 ### ⚙️ 配置 API 凭证
