@@ -19,7 +19,7 @@
 |------|--------|
 | Windows | `.exe` / `.msi` |
 | Linux | `.deb` / `.AppImage` |
-| macOS | `.dmg` (Intel / Apple Silicon) |
+| macOS | `.dmg` (Intel x64) |
 
 ## 配置说明
 
