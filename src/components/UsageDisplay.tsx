@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import clsx from 'clsx';
 import type { UsageData } from '../types/api';
@@ -31,6 +31,23 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
     return usage?.data?.limits || [];
   }, [usage]);
 
+  // 手动刷新函数
+  const refresh = useCallback(async () => {
+    setIsManualRefresh(true);
+    try {
+      const result = await invoke('manual_refresh');
+      if (result) {
+        setLastUpdate(new Date());
+      }
+    } catch (e: any) {
+      // Error handling done in App component
+    } finally {
+      setTimeout(() => {
+        setIsManualRefresh(false);
+      }, 0);
+    }
+  }, []);
+
   // 监听 usage 变化，提取 limits 数据
   useEffect(() => {
     if (usage?.success && usage?.data?.limits) {
@@ -47,23 +64,7 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
     if (!hasInitialData && !error) {
       refresh();
     }
-  }, []);
-
-  const refresh = async () => {
-    setIsManualRefresh(true);
-    try {
-      const result = await invoke('manual_refresh');
-      if (result) {
-        setLastUpdate(new Date());
-      }
-    } catch (e: any) {
-      // Error handling done in App component
-    } finally {
-      setTimeout(() => {
-        setIsManualRefresh(false);
-      }, 0);
-    }
-  };
+  }, [error, refresh]);
 
   const formatNumber = (num: number | undefined, limitType: string): string => {
     if (num === undefined || num === null) return 'N/A';

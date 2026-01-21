@@ -29,27 +29,36 @@ export default function App() {
     });
 
     // 先设置事件监听器（确保不丢失后续事件）
-    listen<UsageData>("usage-update", (event) => {
-      if (mounted) {
-        setUsage(event.payload);
-        setError(null);
-      }
-    }).then(unlisten => unlistens.push(unlisten));
+    const setupListeners = async () => {
+      const u1 = await listen<UsageData>("usage-update", (event) => {
+        if (mounted) {
+          setUsage(event.payload);
+          setError(null);
+        }
+      });
+      unlistens.push(u1);
 
-    listen<string>("usage-error", (event) => {
-      if (mounted) {
-        setError(event.payload);
-      }
-    }).then(unlisten => unlistens.push(unlisten));
+      const u2 = await listen<string>("usage-error", (event) => {
+        if (mounted) {
+          setError(event.payload);
+        }
+      });
+      unlistens.push(u2);
 
-    listen("tray-click", () => {
-      if (mounted) {
-        setShowConfig(prev => !prev);
-      }
-    }).then(unlisten => unlistens.push(unlisten));
+      const u3 = await listen("tray-click", () => {
+        if (mounted) {
+          setShowConfig(prev => !prev);
+        }
+      });
+      unlistens.push(u3);
 
-    // 保存 unlisten 函数
-    unlistensRef.current = unlistens;
+      // 所有监听器设置完成后，保存 unlisten 函数
+      if (mounted) {
+        unlistensRef.current = unlistens;
+      }
+    };
+
+    setupListeners();
 
     // 然后获取当前状态（在监听器设置之后）
     invoke<UsageData | null>("get_current_usage").then(data => {
