@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import clsx from 'clsx';
-import type { UsageData } from '../types/api';
+import type { UsageData, Limit } from '../types/api';
 import styles from './UsageDisplay.module.css';
 
 interface UsageDisplayProps {
@@ -8,16 +7,6 @@ interface UsageDisplayProps {
   error: string | null;
   onConfig: () => void;
   onRefresh: () => void;
-}
-
-interface Limit {
-  type: string;
-  percentage: number;
-  currentValue: number;
-  usage: number;
-  remaining: number;
-  usage_details?: { model_code: string; usage: number }[];
-  nextResetTime?: string;
 }
 
 export default function UsageDisplay({ usage, error, onConfig, onRefresh }: UsageDisplayProps) {
@@ -195,13 +184,13 @@ export default function UsageDisplay({ usage, error, onConfig, onRefresh }: Usag
                 </div>
 
                 {/* 使用详情 */}
-                {limit.usage_details && limit.usage_details.length > 0 && (
+                {limit.usageDetails && limit.usageDetails.length > 0 && (
                   <div className={styles['details-section']}>
                     <h3 className={styles['details-title']}>模型使用详情</h3>
                     <div className={styles['details-list']}>
-                      {limit.usage_details.map((detail, index) => (
+                      {limit.usageDetails.map((detail, index) => (
                         <div key={index} className={styles['detail-row']}>
-                          <span className={styles['detail-name']}>{detail.model_code}</span>
+                          <span className={styles['detail-name']}>{detail.modelCode}</span>
                           <span className={styles['detail-value']}>{formatNumber(detail.usage, 'TOKENS_LIMIT')}</span>
                         </div>
                       ))}

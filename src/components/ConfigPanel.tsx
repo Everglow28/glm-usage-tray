@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import clsx from 'clsx';
-import type { AppConfig } from '../types/api';
+import type { AppConfig, UsageData, Limit } from '../types/api';
 import styles from './ConfigPanel.module.css';
 
 interface ConfigPanelProps {
@@ -52,7 +52,7 @@ export default function ConfigPanel({ config, onSave, onClose }: ConfigPanelProp
         },
       });
 
-      const data = result as any;
+      const data = result as UsageData;
       console.log('=== 测试连接调试 ===');
       console.log('完整响应:', JSON.stringify(data, null, 2));
       console.log('limits 数组:', data?.data?.limits);
@@ -64,7 +64,7 @@ export default function ConfigPanel({ config, onSave, onClose }: ConfigPanelProp
       }
 
       if (data?.data?.limits && data.data.limits.length > 0) {
-        const tokenLimit = data.data.limits.find((l: any) => l.type === 'TOKENS_LIMIT');
+        const tokenLimit = data.data.limits.find((l: Limit) => l.type === 'TOKENS_LIMIT');
         console.log('查找结果 tokenLimit:', tokenLimit);
         if (tokenLimit) {
           setTestResult({
@@ -77,7 +77,7 @@ export default function ConfigPanel({ config, onSave, onClose }: ConfigPanelProp
       } else {
         setTestResult({ type: 'error', message: 'API 返回数据格式异常' });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Test connection error:', e);
       setTestResult({ type: 'error', message: String(e) });
     } finally {
@@ -103,7 +103,7 @@ export default function ConfigPanel({ config, onSave, onClose }: ConfigPanelProp
       onSave({ token, organization, project, refresh_interval: refreshInterval });
       setTestResult({ type: 'success', message: '配置已保存' });
       setTimeout(() => onClose(), 500);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setTestResult({ type: 'error', message: String(e) });
     }
   };

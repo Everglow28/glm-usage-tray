@@ -1,18 +1,18 @@
 // GLM API 响应类型定义
 
 export interface UsageDetail {
-  model_code: string;
+  modelCode: string;  // Rust serde: model_code -> modelCode
   usage: number;
 }
 
 export interface Limit {
   type: string;           // "TIME_LIMIT" | "TOKENS_LIMIT"
   percentage: number;
-  current_value: number;
+  currentValue: number;   // Rust serde: current_value -> currentValue
   usage: number;
   remaining: number;
-  usage_details?: UsageDetail[];
-  next_reset_time?: string;
+  usageDetails?: UsageDetail[];  // Rust serde: usage_details -> usageDetails
+  nextResetTime?: string;  // Rust serde: next_reset_time -> nextResetTime
 }
 
 export interface UsageData {

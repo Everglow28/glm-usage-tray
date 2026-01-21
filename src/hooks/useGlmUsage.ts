@@ -15,7 +15,7 @@ interface UsageResponse {
 export function useGlmUsage() {
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const unlistenRef = useRef<(() => Promise<void>) | null>(null);
+  const unlistenRef = useRef<(() => void) | null>(null);
 
   // 手动刷新
   const refresh = useCallback(async () => {

@@ -11,7 +11,7 @@ export default function App() {
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(true);
-  const unlistensRef = useRef<(() => Promise<void>)[]>([]);
+  const unlistensRef = useRef<(() => void)[]>([]);
 
   // 手动刷新函数
   const handleRefresh = useCallback(async () => {
@@ -28,7 +28,7 @@ export default function App() {
 
   useEffect(() => {
     let mounted = true;
-    const unlistens: (() => Promise<void>)[] = [];
+    const unlistens: (() => void)[] = [];
 
     // 先设置事件监听器
     const setupListeners = async () => {
