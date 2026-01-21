@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { invoke } from '@tauri-apps/api/core';
 import clsx from 'clsx';
 import type { UsageData } from '../types/api';
 import styles from './UsageDisplay.module.css';
@@ -8,6 +7,7 @@ interface UsageDisplayProps {
   usage: UsageData | null;
   error: string | null;
   onConfig: () => void;
+  onRefresh: () => void;
 }
 
 interface Limit {
@@ -20,9 +20,8 @@ interface Limit {
   nextResetTime?: string;
 }
 
-export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayProps) {
+export default function UsageDisplay({ usage, error, onConfig, onRefresh }: UsageDisplayProps) {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const [isManualRefresh, setIsManualRefresh] = useState(false);
 
   const hasData = usage?.success === true && Array.isArray(usage?.data?.limits) && usage.data.limits.length > 0;
   const isLoading = !hasData && !error;
@@ -31,32 +30,17 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
     return usage?.data?.limits || [];
   }, [usage]);
 
-  // 手动刷新函数
-  const refresh = useCallback(async () => {
-    setIsManualRefresh(true);
-    try {
-      const result = await invoke('manual_refresh');
-      if (result) {
-        setLastUpdate(new Date());
-      }
-    } catch (e: any) {
-      // Error handling done in App component
-    } finally {
-      setTimeout(() => {
-        setIsManualRefresh(false);
-      }, 0);
-    }
-  }, []);
+  // 使用父组件传递的刷新函数
+  const refresh = useCallback(() => {
+    onRefresh();
+  }, [onRefresh]);
 
-  // 监听 usage 变化，提取 limits 数据
+  // 监听 usage 变化，统一更新时间（手动和自动都更新）
   useEffect(() => {
     if (usage?.success && usage?.data?.limits) {
-      // 只有在非手动刷新时才更新 lastUpdate
-      if (!isManualRefresh) {
-        setLastUpdate(new Date());
-      }
+      setLastUpdate(new Date());
     }
-  }, [usage, isManualRefresh]);
+  }, [usage]);
 
   // 组件挂载时，如果没有数据，自动触发一次刷新
   useEffect(() => {
@@ -183,8 +167,7 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
                       style={{
                         width: `${limit.percentage}%`,
                         backgroundColor: getProgressColor(limit.percentage),
-                      }}
-                    ></div>
+                      }}></div>
                   </div>
                 </div>
 
@@ -192,22 +175,16 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
                 <div className={styles['values-row']}>
                   <div className={styles['value-item']}>
                     <span className={styles['value-label']}>已用</span>
-                    <span className={styles['value-number']}>
-                      {formatNumber(limit.currentValue, limit.type)}
-                    </span>
+                    <span className={styles['value-number']}>{formatNumber(limit.currentValue, limit.type)}</span>
                   </div>
                   <div className={styles['value-divider']}>/</div>
                   <div className={styles['value-item']}>
                     <span className={styles['value-label']}>总额</span>
-                    <span className={styles['value-number']}>
-                      {formatNumber(limit.usage, limit.type)}
-                    </span>
+                    <span className={styles['value-number']}>{formatNumber(limit.usage, limit.type)}</span>
                   </div>
                   <div className={styles['value-item']}>
                     <span className={styles['value-label']}>剩余</span>
-                    <span className={styles['value-number']}>
-                      {formatNumber(limit.remaining, limit.type)}
-                    </span>
+                    <span className={styles['value-number']}>{formatNumber(limit.remaining, limit.type)}</span>
                   </div>
                 </div>
 
@@ -225,9 +202,7 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
                       {limit.usage_details.map((detail, index) => (
                         <div key={index} className={styles['detail-row']}>
                           <span className={styles['detail-name']}>{detail.model_code}</span>
-                          <span className={styles['detail-value']}>
-                            {formatNumber(detail.usage, 'TOKENS_LIMIT')}
-                          </span>
+                          <span className={styles['detail-value']}>{formatNumber(detail.usage, 'TOKENS_LIMIT')}</span>
                         </div>
                       ))}
                     </div>
@@ -252,9 +227,7 @@ export default function UsageDisplay({ usage, error, onConfig }: UsageDisplayPro
       ) : (
         <div className={styles['loading-state']}>
           <div className={styles['loading-spinner']}></div>
-          <p className={styles['loading-text']}>
-            {isLoading ? '正在加载用量数据...' : '暂无数据，请先配置 API 信息'}
-          </p>
+          <p className={styles['loading-text']}>{isLoading ? '正在加载用量数据...' : '暂无数据，请先配置 API 信息'}</p>
           <button className={styles['loading-btn']} onClick={refresh}>
             手动刷新
           </button>
