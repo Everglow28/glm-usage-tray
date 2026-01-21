@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-01-22
+
 ### Changed
 - **前端框架从 Svelte 迁移到 React 18**
   - 改善响应式更新行为
@@ -17,17 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Rust serde 字段映射改为驼峰式命名
   - 修复 Tauri `UnlistenFn` 类型定义
 - **跨平台构建支持**
-  - 添加 Linux (x86_64) 平台支持
-  - 添加 macOS (Intel + Apple Silicon) 平台支持
+  - 添加 macOS (Apple Silicon) 平台支持
   - GitHub Actions 自动构建所有平台安装包
 
 ### Fixed
 - 修复模型使用详情数字显示为 0.0 的问题（正确显示次数）
 - 修复 Tauri 2.x 权限配置（使用 capabilities 系统）
 - 修复事件监听器资源泄漏问题
+- 修复 macOS bundle 文件路径匹配问题
 
 ### Build
 - 移除 `pnpm-lock.yaml` 版本跟踪
+- 更新 Release 模板为简洁风格
 
 ## [0.1.0] - 2025-01-21
 
@@ -46,5 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Windows 系统托盘集成
 - 友好的中文界面
 
-[Unreleased]: https://github.com/Everglow28/glm-usage-tray/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Everglow28/glm-usage-tray/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Everglow28/glm-usage-tray/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/Everglow28/glm-usage-tray/releases/tag/v0.1.0
