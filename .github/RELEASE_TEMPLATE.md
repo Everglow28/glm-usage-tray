@@ -1,11 +1,13 @@
-## 🎉 版本 {{ VERSION }}
+## 🎉 版本 x.y.z
+
+> **注意**：此文件为 Release 说明模板，创建 Release 时请将 `x.y.z` 替换为实际版本号（如 `0.1.0`）
 
 ### 📦 下载
 
 | 文件 | 说明 |
 |------|------|
-| `glm-usage-tray_{{ VERSION }}_x64-setup.exe` | Windows 安装程序 |
-| `glm-usage-tray_{{ VERSION }}_x64-setup.msi` | Windows MSI 安装包 |
+| `glm-usage-tray_x.y.z_x64-setup.exe` | Windows 安装程序 |
+| `glm-usage-tray_x.y.z_x64-setup.msi` | Windows MSI 安装包 |
 
 ### 🚀 安装方法
 
@@ -38,5 +40,5 @@
 ### 📚 更多信息
 
 - [项目主页](https://github.com/Everglow28/glm-usage-tray)
-- [完整文档](https://github.com/Everglow28/glm-usage-tray/blob/main/README.md)
-- [更新日志](https://github.com/Everglow28/glm-usage-tray/blob/main/CHANGELOG.md)
+- [完整文档](https://github.com/Everglow28/glm-usage-tray/blob/master/README.md)
+- [更新日志](https://github.com/Everglow28/glm-usage-tray/blob/master/CHANGELOG.md)
