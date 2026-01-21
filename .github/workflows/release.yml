@@ -63,8 +63,8 @@ jobs:
         with:
           name: windows-bundle
           path: |
-            src-tauri/target/*/release/bundle/nsis/*.exe
-            src-tauri/target/*/release/bundle/nsis/*.msi
+            src-tauri/target/**/release/bundle/nsis/*.exe
+            src-tauri/target/**/release/bundle/nsis/*.msi
 
       - name: Upload artifacts (macOS)
         if: startsWith(matrix.platform, 'macos-')
@@ -72,8 +72,8 @@ jobs:
         with:
           name: macos-bundle
           path: |
-            src-tauri/target/*/release/bundle/dmg/*.dmg
-            src-tauri/target/*/release/bundle/macos/*.app
+            src-tauri/target/**/release/bundle/dmg/*.dmg
+            src-tauri/target/**/release/bundle/macos/*.app
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -82,10 +82,10 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            src-tauri/target/*/release/bundle/nsis/*.exe
-            src-tauri/target/*/release/bundle/nsis/*.msi
-            src-tauri/target/*/release/bundle/dmg/*.dmg
-            src-tauri/target/*/release/bundle/macos/*.app
+            src-tauri/target/**/release/bundle/nsis/*.exe
+            src-tauri/target/**/release/bundle/nsis/*.msi
+            src-tauri/target/**/release/bundle/dmg/*.dmg
+            src-tauri/target/**/release/bundle/macos/*.app
           body: |
             ## GLM Usage Tray ${{ github.ref_name }}
 
@@ -96,7 +96,7 @@ jobs:
             - `.msi` Windows 安装程序
 
             **macOS**
-            - `.dmg` 磁盘映像 (Intel x64)
+            - `.dmg` 磁盘映像 (Apple Silicon)
             - `.app` 应用程序
 
             ### 安装方法

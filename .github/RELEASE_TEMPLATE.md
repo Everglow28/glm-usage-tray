@@ -3,7 +3,7 @@
 ### 📦 下载
 
 **Windows**: `.exe` / `.msi` 安装包
-**macOS**: `.dmg` 磁盘映像（Intel x64）
+**macOS**: `.dmg` 磁盘映像（Apple Silicon）
 
 ### 🚀 快速安装
 
