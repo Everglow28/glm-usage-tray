@@ -31,3 +31,6 @@ src-tauri/gen/
 
 # Config (contains sensitive data)
 config.json
+
+# Temporary memory files
+.claude-temp.md
