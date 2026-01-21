@@ -462,17 +462,17 @@ src/
 - [ ] **Bundle Size**：React 引入后打包体积增加在可接受范围内（通常 +30-50KB）
 
 ### 代码质量验收
-- [ ] 无 `any` 类型，全部使用定义的接口
-- [ ] 所有 Tauri listen 都有清理逻辑
-- [ ] 无 useEffect 闭包陷阱警告
+- [x] 无 `any` 类型，全部使用定义的接口
+- [x] 所有 Tauri listen 都有清理逻辑
+- [x] 无 useEffect 闭包陷阱警告
 
 ---
 
 ## 迁移记录
 
-### 2025-01-21 迁移完成
+### 2026-01-21 迁移完成
 
-**状态**：迁移完成，开发环境启动成功
+**状态**：迁移完成，静态验收通过 ✅
 
 **完成项目**：
 - ✅ 更新 package.json：移除 Svelte 依赖，添加 React 依赖
@@ -494,9 +494,89 @@ src/
 - Vite 5.4.21
 - clsx 2.1.1
 
-**待修复问题**：
-- 存在待修复的 bug（待具体记录）
+---
 
-**注意事项**：
+### 缺陷修复记录
+
+#### 问题 1: 字段名错误
+**文件**: `src/components/ConfigPanel.tsx:62`
+
+**错误代码**: `data.data.limits[0].limit_type`
+
+**修复**: `data.data.limits[0].type`
+
+**原因**: Rust 后端字段 `limit_type` 经 serde 序列化后 JSON 字段名为 `type`（使用 `rename = "type"`）
+
+#### 问题 2: 类型定义缺失
+**文件**: `src/hooks/useGlmUsage.ts:4,9`
+
+**错误代码**:
+```ts
+interface UsageResponse {
+  data?: { limits: any[] };
+}
+```
+
+**修复**:
+```ts
+import type { Limit } from '../types/api';
+interface UsageResponse {
+  data?: { limits: Limit[] };
+}
+```
+
+#### 问题 3: Tauri listen 资源泄漏
+**文件**: `src/App.tsx`
+
+**问题**: 三个 `listen()` 调用未保存 unlisten 函数，HMR 时会导致重复监听
+
+**修复**: 添加 `unlistensRef` 保存所有 unlisten 函数，在 cleanup 时调用
+```ts
+const unlistensRef = useRef<(() => Promise<void>)[]>([]);
+
+listen("usage-update", ...).then(unlisten => unlistens.push(unlisten));
+listen("usage-error", ...).then(unlisten => unlistens.push(unlisten));
+listen("tray-click", ...).then(unlisten => unlistens.push(unlisten));
+
+return () => {
+  unlistensRef.current.forEach(unlisten => unlisten());
+};
+```
+
+---
+
+### 验收状态
+
+| 检查项 | 状态 |
+|--------|------|
+| 配置文件正确性 | ✅ 通过 |
+| 字段名修复 | ✅ 通过 |
+| 类型定义完整 | ✅ 通过 |
+| 资源泄漏修复 | ✅ 通过 |
+| 构建验证 | ✅ 通过 (JS: 155.95 kB) |
+| 无 `any` 类型 | ✅ 通过 |
+| Tauri listen 清理 | ✅ 通过 |
+| useEffect 闭包陷阱 | ✅ 通过 |
+
+---
+
+### Git 提交记录
+
+```
+bf41752 修复 React 迁移后的代码缺陷
+07e3fab 重构：将前端从 Svelte 迁移到 React
+```
+
+**分支结构**：
+- `master`: 生产分支（Svelte 版本 v0.1.0）
+- `dev`: 开发分支（React 版本，已通过静态验收）
+- `feature/react-migration`: 迁移功能分支（已合并到 dev）
+
+---
+
+### 注意事项
+
 - Git Bash 环境下使用 `taskkill` 需要通过 `cmd.exe //c` 调用
 - 端口 1420 被占用时使用 `netstat -ano | findstr :1420` 查找进程
+- Rust 字段序列化规则：`limit_type` → JSON `type`，`current_value` → JSON `currentValue`
+- Tauri listen 必须保存 unlisten 并在 useEffect cleanup 中调用
