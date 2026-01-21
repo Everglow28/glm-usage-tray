@@ -191,7 +191,7 @@ export default function UsageDisplay({ usage, error, onConfig, onRefresh }: Usag
                       {limit.usageDetails.map((detail, index) => (
                         <div key={index} className={styles['detail-row']}>
                           <span className={styles['detail-name']}>{detail.modelCode}</span>
-                          <span className={styles['detail-value']}>{formatNumber(detail.usage, 'TOKENS_LIMIT')}</span>
+                          <span className={styles['detail-value']}>{formatNumber(detail.usage, limit.type)}</span>
                         </div>
                       ))}
                     </div>
