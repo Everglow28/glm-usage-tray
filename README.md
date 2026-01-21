@@ -1,5 +1,11 @@
 # GLM Usage Tray
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-success.svg)](https://opensource.org/licenses/MIT)
+[![GitHub release](https://img.shields.io/github/release/Everglow28/glm-usage-tray?color=green)](https://github.com/Everglow28/glm-usage-tray/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-success.svg)](https://github.com/Everglow28/glm-usage-tray/releases)
+[![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-32BC64.svg?logo=tauri)](https://tauri.app/)
+
 跨平台系统托盘应用，实时监控 GLM Coding Plan 订阅使用量。
 
 支持 Windows、macOS (Apple Silicon)。
@@ -17,7 +23,7 @@
 
 | 平台 | 安装包 |
 |------|--------|
-| Windows | `.exe` / `.msi` |
+| Windows | `.exe` 安装包 |
 | macOS | `.dmg` (Apple Silicon) |
 
 ## 配置说明
