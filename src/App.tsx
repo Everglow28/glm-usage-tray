@@ -4,7 +4,7 @@ import { listen } from '@tauri-apps/api/event';
 import type { AppConfig, UsageData } from './types/api';
 import ConfigPanel from './components/ConfigPanel';
 import UsageDisplay from './components/UsageDisplay';
-
+import './app.css';
 export default function App() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [usage, setUsage] = useState<UsageData | null>(null);
