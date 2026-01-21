@@ -2,7 +2,7 @@
 
 跨平台系统托盘应用，实时监控 GLM Coding Plan 订阅使用量。
 
-支持 Windows、Linux (Debian/Ubuntu)、macOS (Intel + Apple Silicon)。
+支持 Windows、macOS (Intel x64)。
 
 ## 功能
 
@@ -18,7 +18,6 @@
 | 平台 | 安装包 |
 |------|--------|
 | Windows | `.exe` / `.msi` |
-| Linux | `.deb` / `.AppImage` |
 | macOS | `.dmg` (Intel x64) |
 
 ## 配置说明
