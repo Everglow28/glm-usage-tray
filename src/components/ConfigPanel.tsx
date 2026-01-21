@@ -59,7 +59,7 @@ export default function ConfigPanel({ config, onSave, onClose }: ConfigPanelProp
       console.log('limits 长度:', data?.data?.limits?.length);
       if (data?.data?.limits && data.data.limits.length > 0) {
         console.log('第一个 limit:', JSON.stringify(data.data.limits[0], null, 2));
-        console.log('第一个 limit.limit_type:', data.data.limits[0].limit_type);
+        console.log('第一个 limit.type:', data.data.limits[0].type);
         console.log('字段枚举:', Object.keys(data.data.limits[0]));
       }
 

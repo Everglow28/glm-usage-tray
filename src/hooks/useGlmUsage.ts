@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import type { UsageData, UsageError } from '../types/api';
+import type { UsageData, UsageError, Limit } from '../types/api';
 
 interface UsageResponse {
   success: boolean;
   data?: {
-    limits: any[];
+    limits: Limit[];
   };
   code?: string;
   message?: string;

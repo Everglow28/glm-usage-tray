@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { AppConfig, UsageData } from './types/api';
@@ -11,9 +11,11 @@ export default function App() {
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(true);
+  const unlistensRef = useRef<(() => Promise<void>)[]>([]);
 
   useEffect(() => {
     let mounted = true;
+    const unlistens: (() => Promise<void>)[] = [];
 
     // 加载配置
     invoke<AppConfig>("get_config").then(cfg => {
@@ -32,19 +34,22 @@ export default function App() {
         setUsage(event.payload);
         setError(null);
       }
-    });
+    }).then(unlisten => unlistens.push(unlisten));
 
     listen<string>("usage-error", (event) => {
       if (mounted) {
         setError(event.payload);
       }
-    });
+    }).then(unlisten => unlistens.push(unlisten));
 
     listen("tray-click", () => {
       if (mounted) {
         setShowConfig(prev => !prev);
       }
-    });
+    }).then(unlisten => unlistens.push(unlisten));
+
+    // 保存 unlisten 函数
+    unlistensRef.current = unlistens;
 
     // 然后获取当前状态（在监听器设置之后）
     invoke<UsageData | null>("get_current_usage").then(data => {
@@ -61,6 +66,8 @@ export default function App() {
 
     return () => {
       mounted = false;
+      // 清理所有监听器
+      unlistensRef.current.forEach(unlisten => unlisten());
     };
   }, []);
 
