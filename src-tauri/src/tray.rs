@@ -1,7 +1,7 @@
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    Emitter, Manager,
+    Emitter, Image, Manager,
 };
 
 pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error::Error>> {
@@ -13,13 +13,14 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
     let menu = Menu::with_items(app, &[&open_config, &refresh, &separator, &quit])?;
 
     let icon_path = app.path().resolve("icons/icon.png", tauri::path::BaseDirectory::Resource)?;
+    let icon = Image::from_path(icon_path)?;
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
         .tooltip("GLM Usage Monitor")
         .icon_as_template(true)
-        .icon(&icon_path)
+        .icon(icon)
         .build(app)?;
 
     // 处理托盘事件
