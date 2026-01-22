@@ -12,13 +12,14 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
 
     let menu = Menu::with_items(app, &[&open_config, &refresh, &separator, &quit])?;
 
-    let _icon_path = app.path().resolve("icons/icon.png", tauri::path::BaseDirectory::Resource)?;
+    let icon_path = app.path().resolve("icons/icon.png", tauri::path::BaseDirectory::Resource)?;
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
         .show_menu_on_left_click(false)
         .tooltip("GLM Usage Monitor")
         .icon_as_template(true)
+        .icon(&icon_path)
         .build(app)?;
 
     // 处理托盘事件
