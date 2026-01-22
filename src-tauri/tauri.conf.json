@@ -17,17 +17,17 @@
         "label": "config",
         "width": 600,
         "height": 500,
+        "minWidth": 500,
+        "minHeight": 400,
         "resizable": true,
         "center": true,
         "visible": false,
-        "decorations": true,
-        "minimumWidth": 500,
-        "minimumHeight": 400
+        "decorations": true
       }
     ],
     "security": {
       "csp": null
-    },
+    }
   },
   "bundle": {
     "active": true,
