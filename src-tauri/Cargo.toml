@@ -1,6 +1,6 @@
 [package]
 name = "glm-usage-tray"
-version = "0.1.0"
+version = "0.2.0"
 description = "GLM Coding Plan usage monitor"
 authors = ["you"]
 edition = "2021"
