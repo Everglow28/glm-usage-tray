@@ -120,6 +120,20 @@ useEffect(() => {
 
 详细的开发工作流请参考 [`.memory/WORKFLOW.md`](.memory/WORKFLOW.md)
 
-- **功能分支 PR 工作流**：使用 feature 分支开发，通过 PR 合并
-- **缺陷修复流程**：修复→构建→测试→提交→推送
-- **发布流程**：参考 [`.memory/RELEASE.md`](.memory/RELEASE.md)
+### 分支策略
+
+```
+master (主分支)
+  ↑ Release Workflow
+dev (集成验证，CI 保护)
+  ↑ 仅 PR 合并 (rebase)
+feature/xxx, fix/xxx
+```
+
+### 核心规则
+
+- 所有代码修改必须在 `feature/xxx` 或 `fix/xxx` 分支完成
+- 通过 PR 合并到 `dev`，必须通过 CI 检查（install, build, lint）
+- `dev` 分支禁止直接 push
+- PR 合并方式为 rebase
+- 打包发布由 Release Workflow 负责，仅在 master 分支触发
