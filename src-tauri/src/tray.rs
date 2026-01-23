@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use tauri::{
     image::Image,
     menu::{Menu, MenuItem, PredefinedMenuItem},
@@ -15,19 +13,28 @@ pub fn create_tray(app: &mut tauri::App) -> Result<TrayIcon, Box<dyn std::error:
 
     let menu = Menu::with_items(app, &[&open_config, &refresh, &separator, &quit])?;
 
-    // 解析图标路径
-    // 在开发环境，可执行文件位于 src-tauri/target/debug/
-    // 需要向上一级找到 src-tauri，然后进入 icons/
+    // 解析图标路径 - 兼容开发和生产环境
     let exe_path = std::env::current_exe()?;
     let exe_dir = exe_path.parent().ok_or("无法获取可执行文件目录")?;
 
-    // 从 target/debug 向上找 src-tauri，然后进入 icons
-    let icon_path = exe_dir
-        .parent()  // target
-        .and_then(|p| p.parent())  // src-tauri
-        .map(|p| p.join("icons/icon.png"))
-        .filter(|p| p.exists())
-        .ok_or("图标文件不存在，请确保 src-tauri/icons/icon.png 存在")?;
+    // 尝试多种可能的图标路径
+    let icon_path = {
+        // 开发环境: src-tauri/target/debug -> icons/
+        let dev_path = exe_dir
+            .parent()  // target
+            .and_then(|p| p.parent())  // src-tauri
+            .map(|p| p.join("icons/icon.png"));
+
+        // 生产环境: .exe 同目录下的 icons/
+        let prod_path = exe_dir.join("icons/icon.png");
+
+        // 优先尝试生产环境路径，再尝试开发环境路径
+        prod_path
+            .exists()
+            .then(|| prod_path)
+            .or(dev_path.filter(|p| p.exists()))
+            .ok_or("图标文件不存在")?
+    };
     let icon = Image::from_path(icon_path)?;
 
     let tray = TrayIconBuilder::new()
